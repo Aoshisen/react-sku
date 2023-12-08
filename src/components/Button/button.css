@@ -1,0 +1,14 @@
+.button {
+	display: inline-block;
+	padding: 2px 10px;
+	border: 1px solid #000;
+}
+
+.active {
+	border-color: yellow;
+}
+
+.disable {
+	cursor: not-allowed;
+	background-color: blanchedalmond;
+}
