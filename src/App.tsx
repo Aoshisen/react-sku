@@ -1,44 +1,96 @@
-import { data } from "./data";
-import { BaseLayout } from "./components";
+import { BaseLayout, IBaseProps } from "./components";
 import "./app.css";
+import { useEffect, useState } from "react";
+import {
+  findCategory,
+  active,
+  BaseButtons,
+  enRichData,
+  findProducts,
+  getListFrom,
+  disable,
+} from "./helper";
 
-function findCategory(categoryName: string) {
-  return data.list
-    .find((item) => item.attributeDisplayName === categoryName)
-    ?.attributeValues.map((item) => item.attributeValue);
-}
-const colors = findCategory("颜色");
-const sizes = findCategory("尺码");
-const place = findCategory("产地");
-
-// interface IData {
-//   data: any;
-// }
-// const Colors: React.FC<IData> = ({ data }) => {
-//   return <BaseLayout label="颜色" buttons={data}></BaseLayout>;
-// };
-
-// const Sizes: React.FC<IData> = ({ data }) => {
-//   return <BaseLayout label="尺码" buttons={data}></BaseLayout>;
-// };
-// const Place: React.FC<IData> = ({ data }) => {
-//   return <BaseLayout label="产地" buttons={data}></BaseLayout>;
-// };
+const colors_data = findCategory("颜色");
+const sizes_data = findCategory("尺码");
+const place_data = findCategory("产地");
 
 function App() {
-  console.log(colors, "colors<<<<<<");
-  console.log(sizes, "sizes<<<<<<");
-  console.log(place, "place<<<<<<");
+  const [colors, setColors] = useState<BaseButtons>(enRichData(colors_data));
+  const [sizes, setSizes] = useState<BaseButtons>(enRichData(sizes_data));
+  const [place, setPlace] = useState<BaseButtons>(enRichData(place_data));
+
+  const [color_active, setColorActive] = useState<string>("");
+  const [size_active, setSizeActive] = useState<string>("");
+  const [place_active, setPlaceActive] = useState<string>("");
+  function shouldDisable() {}
+  useEffect(() => {
+    const _place_active = place?.find((item) => item.active);
+    const _color_active = colors?.find((item) => item.active);
+    const _size_active = sizes?.find((item) => item.active);
+    if (_place_active?.value !== place_active) {
+      setPlaceActive(_place_active?.value || "");
+    }
+    if (_size_active?.value !== size_active) {
+      setSizeActive(_size_active?.value || "");
+    }
+    if (_color_active?.value !== color_active) {
+      setColorActive(_color_active?.value || "");
+    }
+  }, [place, sizes, colors]);
+
+  useEffect(() => {
+    const productList = findProducts(color_active);
+    const new_list = getListFrom(productList);
+    setPlace((place) => disable(place, new_list));
+    setSizes((sizes) => disable(sizes, new_list));
+    console.log(color_active, "color_active<<<<<<<<<");
+  }, [color_active]);
+
+  useEffect(() => {
+    //找到所有产地为place_active de sku
+    const productList = findProducts(place_active);
+    const new_list = getListFrom(productList);
+    setColors((colors) => disable(colors, new_list));
+    setSizes((sizes) => disable(sizes, new_list));
+    console.log(place_active, new_list, "place_active<<<<<<<<<");
+  }, [place_active]);
+  useEffect(() => {
+    const productList = findProducts(size_active);
+    const new_list = getListFrom(productList);
+    setColors((colors) => disable(colors, new_list));
+    setPlace((place) => disable(place, new_list));
+    console.log(size_active, "size_active<<<<<<<<<");
+  }, [size_active]);
+
+  function handlePlaceClick(_place: string) {
+    setPlace((place) => active(place, _place));
+  }
+  function handleSizeClick(size: string) {
+    setSizes((sizes) => active(sizes, size));
+  }
+  function handleColorClick(color: string) {
+    setColors((colors) => active(colors, color));
+  }
   return (
     <div className="app">
       <div className="content">
-        <BaseLayout label="产地" buttons={place}></BaseLayout>
-        <BaseLayout label="尺码" buttons={sizes}></BaseLayout>
-        <BaseLayout label="颜色" buttons={colors}></BaseLayout>
+        <BaseLayout
+          label="产地"
+          buttons={place}
+          onButtonsClick={handlePlaceClick}
+        ></BaseLayout>
+        <BaseLayout
+          label="尺码"
+          buttons={sizes}
+          onButtonsClick={handleSizeClick}
+        ></BaseLayout>
+        <BaseLayout
+          label="颜色"
+          buttons={colors}
+          onButtonsClick={handleColorClick}
+        ></BaseLayout>
       </div>
-      {/* <Colors data={colors}></Colors>
-      <Sizes data={sizes}></Sizes>
-      <Place data={place}></Place> */}
     </div>
   );
 }

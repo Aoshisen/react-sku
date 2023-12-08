@@ -1,7 +1,8 @@
 import classNames from "classnames";
-import "./button.css"
-interface IButtonProps {
+import "./button.css";
+export interface IButtonProps {
   children: React.ReactNode;
+  onClick?: () => void;
   active?: boolean;
   disable?: boolean;
 }
@@ -9,6 +10,7 @@ export const Button: React.FC<IButtonProps> = ({
   children,
   active = false,
   disable = false,
+  onClick = () => {},
 }) => {
   return (
     <div
@@ -17,6 +19,7 @@ export const Button: React.FC<IButtonProps> = ({
         active: active,
         disable: disable,
       })}
+      onClick={onClick}
     >
       {children}
     </div>

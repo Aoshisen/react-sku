@@ -1,13 +1,18 @@
 import { Label } from "../Label";
-import { Button } from "../Button";
-import React from "react";
+import { Button, IButtonProps } from "../Button";
+import React, { useEffect, useRef, useState } from "react";
 import "./baseLayout.css";
-interface IBaseProps {
+export interface IBaseProps {
   label: string;
-  buttons?: string[];
+  buttons?: { disable: boolean; value: string; active: boolean }[];
+  onButtonsClick?: (button: string) => void;
 }
 
-export const BaseLayout: React.FC<IBaseProps> = ({ label, buttons }) => {
+export const BaseLayout: React.FC<IBaseProps> = ({
+  label,
+  buttons,
+  onButtonsClick,
+}) => {
   return (
     <div className="base-layout">
       <div className="label">
@@ -17,7 +22,16 @@ export const BaseLayout: React.FC<IBaseProps> = ({ label, buttons }) => {
         {buttons && buttons.length ? (
           <React.Fragment>
             {buttons.map((button, index) => (
-              <Button key={index}>{button}</Button>
+              <Button
+                key={index}
+                onClick={() => {
+                  onButtonsClick && onButtonsClick(button.value);
+                }}
+                disable={button?.disable}
+                active={button?.active}
+              >
+                {button.value}
+              </Button>
             ))}
           </React.Fragment>
         ) : (
