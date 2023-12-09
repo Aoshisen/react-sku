@@ -1,14 +1,16 @@
 .button {
 	display: inline-block;
 	padding: 2px 10px;
-	border: 1px solid #000;
+	border: 2px solid #000;
 }
 
 .active {
-	border-color: yellow;
+	border-color: red;
 }
 
 .disable {
 	cursor: not-allowed;
+	color: antiquewhite;
+	border-color: antiquewhite;
 	background-color: blanchedalmond;
 }

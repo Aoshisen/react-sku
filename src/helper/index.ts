@@ -1,6 +1,6 @@
 import { IBaseProps } from "../components";
 import { data } from "../data";
-type SkuInfo = typeof data.skuInfos;
+type SkuInfos = typeof data.skuInfos;
 type List = typeof data.list;
 export type BaseButtons = IBaseProps["buttons"];
 
@@ -21,8 +21,9 @@ export function active(buttons: BaseButtons, button: string) {
   }));
 }
 export function disable(buttons: BaseButtons, new_list: List) {
+  console.log(new_list, "<<<<<<<<<", buttons);
   return buttons?.map((button) => {
-    const disable = new_list.some((item) =>
+    const disable = !new_list.some((item) =>
       item.attributeValues.some(
         (attribute) => attribute.attributeValue === button.value
       )
@@ -37,12 +38,46 @@ export function findCategory(categoryName: string) {
     ?.attributeValues.map((item) => item.attributeValue);
 }
 
-export function findProducts(categoryValue: string) {
-  return data.skuInfos.filter((sku) => {
+export function findProducts(
+  categoryValues: string[],
+  perviousResult?: SkuInfos
+): SkuInfos {
+  //当前使用的变量,第一次循环使用data.skuInfos;
+  perviousResult = perviousResult ? perviousResult : data.skuInfos;
+  let useSkuInfos = data.skuInfos;
+  let result = useSkuInfos;
+  let filterCategoryValues = categoryValues.filter((item) => !!item);
+  const currentCategoryName = filterCategoryValues[0];
+  //删除最后一个
+  filterCategoryValues.shift();
+  result = useSkuInfos.filter((sku) => {
     return sku.attributes.some(
-      (attribute) => attribute.attributeDisplayName === categoryValue
+      ({ attributeDisplayName, attributeValue }) =>
+        attributeDisplayName === currentCategoryName ||
+        attributeValue === currentCategoryName
     );
   });
+  //对result 和之前的结果取交集
+  result = Unit(result, perviousResult);
+  const shouldReturn = result.length === 0 || filterCategoryValues.length === 0;
+  if (shouldReturn) {
+    return result;
+  } else {
+    return findProducts(filterCategoryValues, result);
+  }
+}
+function Unit(firstInfo: SkuInfos, secondInfo: SkuInfos) {
+  let result: SkuInfos = [];
+  firstInfo.map((info) => {
+    const { specId } = info;
+    const valid = secondInfo.some(
+      (second_info) => second_info.specId === specId
+    );
+    if (valid) {
+      result = [...result, info];
+    }
+  });
+  return result;
 }
 
 function checkPlace(name: string) {
@@ -51,7 +86,7 @@ function checkPlace(name: string) {
   console.log(result, name, "checkPlace");
   return result;
 }
-export function getListFrom(data?: SkuInfo) {
+export function getListFrom(data?: SkuInfos) {
   if (!data) {
     return [];
   }

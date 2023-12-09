@@ -1,6 +1,6 @@
 import { BaseLayout, IBaseProps } from "./components";
 import "./app.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   findCategory,
   active,
@@ -23,8 +23,12 @@ function App() {
   const [color_active, setColorActive] = useState<string>("");
   const [size_active, setSizeActive] = useState<string>("");
   const [place_active, setPlaceActive] = useState<string>("");
-  function shouldDisable() {}
+  const isMount = useRef<number>(0);
   useEffect(() => {
+    if (!isMount.current) {
+      isMount.current++;
+      return;
+    }
     const _place_active = place?.find((item) => item.active);
     const _color_active = colors?.find((item) => item.active);
     const _size_active = sizes?.find((item) => item.active);
@@ -40,27 +44,53 @@ function App() {
   }, [place, sizes, colors]);
 
   useEffect(() => {
-    const productList = findProducts(color_active);
+    //找到所有产地为place_active de sku
+    if (!place_active) {
+      return;
+    }
+    const productList = findProducts([place_active, color_active, size_active]);
+    const new_list = getListFrom(productList);
+    setColors((colors) => disable(colors, new_list));
+    setSizes((sizes) => disable(sizes, new_list));
+    // console.log(
+    //   place_active,
+    //   color_active,
+    //   size_active,
+    //   "place_active<<<<<<<<<"
+    // );
+  }, [place_active]);
+  useEffect(() => {
+    if (!color_active) {
+      return;
+    }
+    const productList = findProducts([place_active, color_active, size_active]);
+    // const productList = findProducts([color_active]);
     const new_list = getListFrom(productList);
     setPlace((place) => disable(place, new_list));
     setSizes((sizes) => disable(sizes, new_list));
-    console.log(color_active, "color_active<<<<<<<<<");
+    console.log(
+      place_active,
+      color_active,
+      size_active,
+      "color_active<<<<<<<<<"
+    );
   }, [color_active]);
 
   useEffect(() => {
-    //找到所有产地为place_active de sku
-    const productList = findProducts(place_active);
-    const new_list = getListFrom(productList);
-    setColors((colors) => disable(colors, new_list));
-    setSizes((sizes) => disable(sizes, new_list));
-    console.log(place_active, new_list, "place_active<<<<<<<<<");
-  }, [place_active]);
-  useEffect(() => {
-    const productList = findProducts(size_active);
+    // const productList = findProducts([size_active]);
+    if (!size_active) {
+      return;
+    }
+    const productList = findProducts([place_active, color_active, size_active]);
     const new_list = getListFrom(productList);
     setColors((colors) => disable(colors, new_list));
     setPlace((place) => disable(place, new_list));
-    console.log(size_active, "size_active<<<<<<<<<");
+    console.log(
+      place_active,
+      color_active,
+      size_active,
+      "size_active<<<<<<<<<"
+    );
   }, [size_active]);
 
   function handlePlaceClick(_place: string) {
